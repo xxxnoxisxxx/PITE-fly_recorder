@@ -1,5 +1,5 @@
 # PITE-fly_recorder
-Wymagania do uruchomienia projektu:\n
+Wymagania do uruchomienia projektu: <br \>
 Python 3.4:
 - Matplotlib
 - Tkinter
