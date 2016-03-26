@@ -1,2 +1,8 @@
 # PITE-fly_recorder
-TEST
+Wymagania do uruchomienia projektu:
+Python 3.4:
+- Matplotlib
+- Tkinter
+- SQLite
+Database:
+- SQLite3
