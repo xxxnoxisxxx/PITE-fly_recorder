@@ -40,22 +40,23 @@ class ChartType(Enum):
 #Zmienna przechowujaca aktualny typ wykresu
 actual_chart_type = ChartType.ALTITUDE.value
 #Funkcja zwracajaca parametry do wyswietlenia wykresu w zaleznosci od wybranego typu
-def choose_type(argument):
-	switcher = {
-  						0: ('Altitude ft', altitude_list, 'RED'),
-        			1: ('Speed km/h', speed_list, 'BLUE'),
-        			2: ('KTS', kts_list, 'GREEN'),
-   }
-	return switcher.get(argument)
+def choose_type(arg):
+	switcher =  {
+  	0: ('Altitude ft', altitude_list, 'RED'),
+    1: ('Speed km/h', speed_list, 'BLUE'),
+    2: ('KTS', kts_list, 'GREEN'),
+  }
+	return switcher.get(arg)
 
+#Funkcja zmieniajaca aktualny typ wykresu
 def change_type(chart_type):
 	global actual_chart_type
 	actual_chart_type = chart_type
 
 #Funkcja nawiazujaca polaczenie z nasza baza danych
-def db_init():
+def db_init(fname):
 	global db
-	db = database.MyDB()
+	db = database.MyDB(fname)
 	db.connect()
 
 #Funkcja ladujaca odpowiednia baze danych
@@ -63,41 +64,50 @@ def db_init():
 # - formatujemy odpowiednio nasze dane
 # - odczytujemy dane i inicjalizujemy pola w naszym GUI
 def load_data():
+		
 	global fname
 	fname = askopenfilename(filetypes=(("Database", "*.db"),))
 	
-	#Czyszczenei danych i wykresu
+	#Nawiazanie polaczenia z baza danych
+	db_init(fname)
+	
+	#Czyszczenie danych i wykresu
 	clear_log()
 	clear_charts_params()
 	
+	#Pobranie rekordu z bazy danych
 	res = db.query('SELECT * from AIRPLANE')
+	#Przetworzenie rekordow
 	global records
 	records = DatabaseParser.parse_data(res.fetchall())
 	
+	#Wyswietlenie naglowka informacyjnego o rekordach
 	print_log_header()
+	#Wyswietlenie rekordow w logu w zdefiniowanej przez nas postaci
 	for record in records:
 		print_log(record.get_info_short())
-		
+	#Przygotowanie danych do wyswietania wykresow
 	prepare_charts_data(records)
-	#draw_charts()
-	#print_log()
 
-
+#Wyswietla nazwy naszych rekordow
 def print_log_header():
 	txt2.configure(state="normal")
 	txt2.insert(INSERT, 'Datetime\t\t\tLat.\tLong.\t\tCour.\tDir.\tKTS\tKM\h\tAlt.\tRate')
 	txt2.see(END)
 	txt2.configure(state="disabled")
 
+#Wyswietla informacje o danym rekordzie
 def print_log(record):
 	txt.configure(state="normal")
 	txt.insert(INSERT, str(record) + '\n')
 	txt.see(END)
 	txt.configure(state="disabled")
 	
+#Funkcja pomocnicza do konwersji daty
 def convert_data(str_date):
 	return time.mktime(datetime.strptime(str_date, "%Y-%m-%d %H:%M:%S").timetuple())
 	
+#Funkcja wyluskujaca z pobranych przez nas rekordow informace do rysowania wykresow
 def prepare_charts_data(records):
 	for record in records:
 		time_list.append(convert_data(record.datetime))
@@ -105,6 +115,7 @@ def prepare_charts_data(records):
 		kts_list.append(record.groundspeed_kts)
 		speed_list.append(record.groundspeed_km_per_h)
 	
+#Formatowanie i rysowanie wykresu
 def draw_charts(i):
 	a.clear()
 	#Formatowanie wykresu
@@ -120,21 +131,29 @@ def draw_charts(i):
 	#Rysowanie wykresow
 	a.plot_date(secs,chart_type[1], linestyle='-', color=chart_type[2])
 	
+#Czyszczenie logow
 def clear_log():
 	txt.configure(state="normal")
 	txt.delete('0.0', END)
 	txt.configure(state="disabled")
+	txt2.configure(state="normal")
+	txt2.delete('0.0', END)
+	txt2.configure(state="disabled")
 	
+#Czyszczenie danych
 def clear_charts_params():
 	time_list[:] = []
 	altitude_list[:] = []
 	kts_list[:] = []
 	speed_list[:] = []
 	
+#Funkcja sluzaca do zapisu naszych wykresow
 def save_chart():
 	filename = asksaveasfile(mode='w', defaultextension=".png")
-	a.get_figure().savefig(filename)
+	if filename is not None:
+		a.get_figure().savefig(filename)
 	
+#Zapisuje nasz log z czarnej skrzynki do pliku CSV
 def save_csv():
 	filename = asksaveasfilename()
 	with open(filename+'.csv', "w") as f:
@@ -144,9 +163,6 @@ def save_csv():
 			writer.writerow(row.get_params())
 
 if __name__ == "__main__":
-	#Nawiazanie polaczenia z baza danych
-	db_init()
-	
 	#Tworzymy obiekt odpoweidzialny za nasze GUI i definiujemy jego podstawowe parametry
 	root = Tk()
 	root.style = ttk.Style()
@@ -183,7 +199,7 @@ if __name__ == "__main__":
 	canvas._tkcanvas.grid(column = 1, row=1)
 
 	#Definiujemy obszar, ktory bedzie wyswietlal wygenerowane parametry
-	txt = ScrolledText.ScrolledText(mainframe, height = 9, state="normal")
+	txt = ScrolledText.ScrolledText(mainframe, height = 16, state="normal")
 	txt.grid(column=1,row=4, columnspan=3, sticky=(E,W))
 	txt2 = ScrolledText.ScrolledText(mainframe, height = 1, state="normal")
 	txt2.grid(column=1,row=3, columnspan=3, sticky=(E,W), pady=10)

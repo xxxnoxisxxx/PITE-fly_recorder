@@ -1,4 +1,11 @@
+#Klasa reprezentujaca nasz pomiar
+# - czas pomiaru
+# - szerokosc i dlugosc geograficzna
+# - orientacje
+# - wysokosc
+
 class FlightRecorder(object):
+	#Inicjalizacja parametrow klasy z przetworzonymi danymi z pliku
 	def __init__(self, param):
 		param = list(map(lambda x : x.strip(), param))
 		self.datetime = param[0]
@@ -10,25 +17,13 @@ class FlightRecorder(object):
 		self.groundspeed_km_per_h = param[6]
 		self.altitude_feet = param[7]
 		self.rate = param[8]
-		
+	#Zwraca informacje o zmiennych przechowywanych w klasie oraz ich wartosciach w postaci slownika
 	def get_dict_params(self):
 		return vars(self)
-		
+	#Zwraca informacje o zmiennych przechowywanych w klasie w postaci krotki
 	def get_params(self):
 		return (self.datetime, self.position_latitude, self.position_longitude, self.orientation_course, self.orientation_direction, self.groundspeed_kts, self.groundspeed_km_per_h + ' km/h', self.altitude_feet + ' ft', self.rate)
-		
-	def get_info(self):
-		inf = 'Datetime: ' + self.datetime + '\n'
-		inf += 'Latitude: ' + self.position_latitude + '\n'
-		inf += 'Longtitude: ' + self.position_longitude + '\n'
-		inf += 'Course: ' + self.orientation_course + '\n'
-		inf += 'Direction: ' + self.orientation_direction + '\n'
-		inf += 'KTS: ' + self.groundspeed_kts + '\n'
-		inf += 'Speed: ' + self.groundspeed_km_per_h + ' km\h\n'
-		inf += 'Altitude: ' + self.altitude_feet + 'ft\n'
-		inf += 'Rate: ' + self.rate + '\n'
-		return inf
-		
+	#Zwraca sformatowanego przez nas stringa z informacjami		
 	def get_info_short(self):
 		inf = self.datetime +'\t\t\t' + self.position_latitude + '\t' + self.position_longitude + '\t\t' + self.orientation_course + '\t'
 		inf += self.orientation_direction + '\t' + self.groundspeed_kts + '\t'

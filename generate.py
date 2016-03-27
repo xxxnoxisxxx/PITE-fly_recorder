@@ -45,6 +45,7 @@ def db_init():
 	db.clear()
 
 #Funkcja pobierajaca nasze dane z pliku
+# - tworzy dodatkowo iterator, ktory posluzy nam do generowania parametrow i symulowania lotu
 def get_data_from_file():
 	#Pobieramy odczytane z pliku dane do generowania i przetwarzamy je wstepnie
 	flight = FileReader()
@@ -84,7 +85,7 @@ def draw_charts():
 	a_altitude.plot_date(secs,altitude_list, linestyle='-', color='RED')
 	a_speed.plot_date(secs, kts_list, linestyle='-', color='GREEN')
 
-#Funkcja do aktualizowania aktualnych parametrow samolotu
+#Funkcja do aktualizowania aktualnych wyswietlanych parametrow samolotu
 def update_entry_fields(record_params):
 	for i in range(len(text_variable_list)):
 		text_variable_list[i].set(record_params[i])
@@ -131,7 +132,7 @@ if __name__ == "__main__":
 	#Pobranie danych z pliku
 	get_data_from_file()
 	
-	#Tworzymy obiekt odpoweidzialny za nasze GUI i definiujemy jego podstawowe parametry
+	#Tworzymy obiekt odpowiedzialny za nasze GUI i definiujemy jego podstawowe parametry
 	root = Tk()
 	root.style = ttk.Style()
 	root.style.theme_use("clam")

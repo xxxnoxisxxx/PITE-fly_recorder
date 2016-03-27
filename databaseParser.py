@@ -1,6 +1,7 @@
 from fileReader import *
 from flightRecorder import *
 
+#Klasa pobierajaca rekordy z bazy danych i przetwarzajaca je
 class DatabaseParser(object):
 	@staticmethod
 	def parse_data(data):
